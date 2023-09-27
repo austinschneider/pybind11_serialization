@@ -12,17 +12,6 @@ PYBIND11_MODULE(pyABC, m) {
         .def(py::init<>())
         .def("method", &ABC::method)
         .def("call", &ABC::call)
-        // .def(py::pickle(
-        //     [](const ABC &p) { // __getstate__
-        //         /* Return a tuple that fully encodes the state of the object */
-        //         return py::make_tuple(self.attr("__dict__"));
-        //     },
-        //     [](py::tuple t) { // __setstate__
-        //         /* Create a new C++ instance */
-        //         ABC p;
-        //         return p;
-        //     }
-        // ));
         .def(py::pickle(
         [](const py::object &self) {
             py::dict d;
