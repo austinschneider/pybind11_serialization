@@ -5,6 +5,7 @@ import pyABCserializer
 
 print("Creating instance of module.PyDerived")
 b = module.PyDerived()
+print("Type:", type(b))
 print()
 
 print("Setting data in module.PyDerived")
@@ -51,3 +52,11 @@ print("Checking that object is the correct type and has the data")
 print("Type:", type(c))
 c.call()
 print()
+
+
+print("Attempting to serialize object that was created on c++ side")
+d = pyABCserializer.load(pyABCserializer.save(c))
+d.call()
+print()
+
+print("Exiting script")
