@@ -61,12 +61,15 @@ namespace py = pybind11;
         return str; \
     }
 
+/*
+ * Define the trampoline class for ABC
+ * It is critical that this class has a copy of self, and an aliasing constructor
+ */
 class pyABC : public ABC {
 public:
     using ABC::ABC;
-    pyABC(ABC && parent) : ABC(std::move(parent)) {}
-    pybind11::object self;
-    // C_PYBIND11_SAVELOAD(self, ABC)
+    pyABC(ABC && parent) : ABC(std::move(parent)) {} // Critical for pybind11 to be able to create an instance of this class during deserialization
+    pybind11::object self; // Needed for c++ deserialization
 
     void method() override {
         C_PYBIND11_OVERRIDE(
@@ -75,7 +78,7 @@ public:
                 void,
                 method,
                 "method"
-                )
+        )
     }
 
     void call() override {
