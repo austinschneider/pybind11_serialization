@@ -11,9 +11,6 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
-# parse pyproject.toml for the version
-include(pyproject)
-
 project(leptoninjector VERSION ${LI_VERSION} LANGUAGES CXX)
 
 # include cmake dependencies
@@ -48,6 +45,7 @@ include(pybind11)
 include(cereal)
 
 add_library(ABC SHARED ABC.cxx)
+target_link_libraries(ABC PRIVATE pybind11::embed)
 
 #pybind11_add_module(pyABC ${PROJECT_SOURCE_DIR}/pyABC.cxx ${PROJECT_SOURCE_DIR}/pyABCbindings.cxx)
 pybind11_add_module(pyABC ${PROJECT_SOURCE_DIR}/pyABC.cxx)
