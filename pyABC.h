@@ -114,4 +114,8 @@ public:
                 "call"
         )
     }
+
+    pybind11::object get_self() override {
+        return self;
+    }
 };
