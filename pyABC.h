@@ -7,7 +7,7 @@
 
 namespace py = pybind11;
 
-#define C_PYBIND11_OVERRIDE(selfname, BaseType, returnType, cfuncname, pyfuncname) \
+#define C_PYBIND11_OVERRIDE_PURE(selfname, BaseType, returnType, cfuncname, pyfuncname, ...) \
         BaseType * ref; \
         if(selfname) { \
             ref = selfname.cast<BaseType *>(); \
@@ -20,7 +20,7 @@ namespace py = pybind11;
                 pybind11::function override = \
                     tinfo ? pybind11::detail::get_type_override(static_cast<const BaseType *>(ref), tinfo, pyfuncname) : pybind11::function(); \
                 if (override) { \
-                    auto o = override(); \
+                    auto o = override(__VA_ARGS__); \
                     if (pybind11::detail::cast_is_temporary_value_reference<returnType>::value) { \
                         static pybind11::detail::override_caster_t<returnType> caster; \
                         return pybind11::detail::cast_ref<returnType>(std::move(o), caster); \
@@ -30,6 +30,30 @@ namespace py = pybind11;
             } while (false); \
             pybind11::pybind11_fail( \
                 "Tried to call pure virtual function \"" PYBIND11_STRINGIFY(BaseType) "::" "cfuncname" "\""); \
+        } while (false);
+
+#define C_PYBIND11_OVERRIDE(selfname, BaseType, returnType, cfuncname, pyfuncname, ...) \
+        BaseType * ref; \
+        if(selfname) { \
+            ref = selfname.cast<BaseType *>(); \
+        } else { \
+            ref = this; \
+        } \
+        do { \
+            do { \
+                auto *tinfo = pybind11::detail::get_type_info(typeid(BaseType)); \
+                pybind11::function override = \
+                    tinfo ? pybind11::detail::get_type_override(static_cast<const BaseType *>(ref), tinfo, pyfuncname) : pybind11::function(); \
+                if (override) { \
+                    auto o = override(__VA_ARGS__); \
+                    if (pybind11::detail::cast_is_temporary_value_reference<returnType>::value) { \
+                        static pybind11::detail::override_caster_t<returnType> caster; \
+                        return pybind11::detail::cast_ref<returnType>(std::move(o), caster); \
+                    } \
+                    return pybind11::detail::cast_safe<returnType>(std::move(o)); \
+                } \
+            } while (false); \
+            return BaseType::cfuncname(__VA_ARGS__); \
         } while (false);
 
 #define C_PYBIND11_SAVELOAD(selfname, BaseType) \
@@ -82,10 +106,12 @@ public:
     }
 
     void call() override {
-        PYBIND11_OVERLOAD(
-            void,
-            ABC,
-            call,
-        );
+        C_PYBIND11_OVERRIDE(
+                self,
+                ABC,
+                void,
+                call,
+                "call"
+        )
     }
 };
